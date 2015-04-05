@@ -13,3 +13,4 @@ int main()
 {
 	compressed_alloc(20);
 }
+

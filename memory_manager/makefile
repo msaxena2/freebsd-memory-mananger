@@ -1,8 +1,6 @@
 
-# Makefile for CS/ECE438 MP3
 
 EXE = tester
-
 OBJS = test_alloc.o pool_memory_manager.o
 DEPS = resources/list.h
 COMPILER = cc
@@ -19,8 +17,10 @@ $(EXE) : $(OBJS)
 test_alloc.o : test/test_alloc.c
 	$(COMPILER) $(COMPILER_OPTS) test/test_alloc.c
 
+
 pool_memory_manager.o : pool_memory_manager.c $(DEPS)
 	$(COMPILER) $(COMPILER_OPTS) pool_memory_manager.c
 	
+
 clean :
 	-rm -f *.o $(EXE) 
