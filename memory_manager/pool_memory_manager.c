@@ -36,6 +36,7 @@ struct main_block_list * block_list_ptr = NULL;
  */
 void * first_fit_add(void * block_ptr, size_t size) {
 	//@Todo: Implement the first fit. Jay can probably look at this.
+	return NULL;
 }
 
 void * compressed_alloc(size_t size) {
