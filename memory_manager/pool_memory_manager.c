@@ -26,8 +26,16 @@ struct main_block_list {
  */
 struct main_block_list * block_list_ptr = NULL;
 
+
+/*
+ * Given a block, method follows first fit strategy to find the
+ * first memory space which can accommodate the requested space.
+ *
+ * Implemented strategy follows implicit lists with bidirectional
+ * coalescing.
+ */
 void * first_fit_add(void * block_ptr, size_t size) {
-	return NULL;
+	//@Todo: Implement the first fit. Jay can probably look at this.
 }
 
 void * compressed_alloc(size_t size) {
@@ -42,15 +50,21 @@ void * compressed_alloc(size_t size) {
 	/* First fit strategy for the blocks */
 	struct list_head * pos;
 	struct main_block_list * curr_node;
-	list_for_each(pos, &(block_list_ptr->node)){
+
+	/*traverse each block to find an empty block */
+	list_for_each(pos, &(block_list_ptr->node))
+	{
 		curr_node = list_entry(pos, struct main_block_list, node);
-		void * ret_prt = first_fit_add(curr_node, size);
+		void * ret_ptr = first_fit_add(curr_node, size);
+		/* successful addition happened at one of the blocks */
+		if (!ret_ptr) {
+			return ret_ptr;
+		}
 	}
 	return NULL;
 }
 
-
 void free(void * ptr) {
-	printf("%s \n", "free");
+	//@Todo Serin can look at this part.
 }
 
