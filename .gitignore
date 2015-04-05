@@ -182,3 +182,6 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
+
+memory_manager/tester
