@@ -36,7 +36,30 @@ struct main_block_list * block_list_ptr = NULL;
  */
 void * first_fit_add(void * block_ptr, size_t size) {
 	//@Todo: Implement the first fit. Jay can probably look at this.
-	return NULL;
+    int *block_ptr_node = (int *)block_ptr;
+    while ((block_ptr - (void*)block_ptr_node < BLOCK_SIZE) &&  // FIXME: Right way to check if the pointer went above boundary?
+            ((*block_ptr_node & 1) || (*block_ptr_node <= size - 2))) { // TODO: size-2 requirement should be relaxed. If the first requested size is 8MB, it should still be able to serve.
+        block_ptr_node = block_ptr_node + (*block_ptr_node & -2);
+    }
+
+    int new_size = ((size + 2) >> 1) << 1; // This creates a bit flag in the LSB. We use this to flag if the chunk is used
+    int old_size = *block_ptr_node & -2;
+    int offset_size = old_size - new_size;
+
+
+    *block_ptr_node = new_size | 1;
+    *(block_ptr_node + new_size - 1) = new_size | 1; // set bit for tail buffer
+
+    int *block_ptr_node_neighbor = block_ptr_node + new_size;
+
+    *block_ptr_node_neighbor = offset_size | 0;
+    *(block_ptr_node_neighbor + offset_size) = offset_size | 0;
+
+
+    if (new_size < old_size) {
+        *(block_ptr_node + new_size) = old_size - new_size;
+    }
+	return block_ptr_node;
 }
 
 void * compressed_alloc(size_t size) {
