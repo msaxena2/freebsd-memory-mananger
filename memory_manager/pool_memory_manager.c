@@ -35,7 +35,6 @@ struct main_block_list * block_list_ptr = NULL;
  * coalescing.
  */
 void * first_fit_add(void * block_ptr, size_t size) {
-	//@Todo: Implement the first fit. Jay can probably look at this.
     int *block_ptr_node = (int *)block_ptr;
     while ((block_ptr - (void*)block_ptr_node < BLOCK_SIZE) &&  // FIXME: Right way to check if the pointer went above boundary?
             ((*block_ptr_node & 1) || (*block_ptr_node <= size - 2))) { // TODO: size-2 requirement should be relaxed. If the first requested size is 8MB, it should still be able to serve.
@@ -56,9 +55,11 @@ void * first_fit_add(void * block_ptr, size_t size) {
     *(block_ptr_node_neighbor + offset_size) = offset_size | 0;
 
 
+    //TODO: CHECK BOUNDARY CONDITIONS
     if (new_size < old_size) {
         *(block_ptr_node + new_size) = old_size - new_size;
     }
+
 	return block_ptr_node;
 }
 
