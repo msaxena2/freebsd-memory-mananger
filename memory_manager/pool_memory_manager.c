@@ -90,6 +90,24 @@ void * compressed_alloc(size_t size) {
 }
 
 void free(void * ptr) {
-	//@Todo Serin can look at this part.
+    int *block_ptr_node = (int *)ptr;
+
+    int size_of_ptr_block = *block_ptr_node;
+    *block_ptr_node |= 0;
+    *(block_ptr_node + size_of_ptr_block) |= 0;
+
+    // Check left neighbor
+    if ((block_ptr_node - 1) & 1 == 0) { // TODO: Check left boundary
+        int *left_neigbor = block_ptr_node - *block_ptr_node;
+        *left_neigbor = (*left_neigbor + size_of_ptr_block);
+        *(left_neigbor + (*left_neigbor - 1)) = *left_neigbor;
+        block_ptr_node = left_neigbor;
+    }
+
+    // Check right neighbor
+    if ((block_ptr_node + *block_ptr_node) & 1 == 0) { // TODO: Check right boundary;
+        int *right_neighbor = block_ptr_node + *block_ptr_node;
+        *(right_neighbor + (*right_neighbor - 1)) = *block_ptr_node + *right_neighbor;// update tail buffer of right_neighbor
+    }
 }
 
