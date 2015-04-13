@@ -71,19 +71,15 @@ void * first_fit_add(void * block_ptr, size_t size) {
     int old_size = *block_ptr_node & -2;
     int offset_size = old_size - new_size;
 
-
     *block_ptr_node = new_size | 1;
     *(block_ptr_node + new_size - 1) = new_size | 1; // set bit for tail buffer
+    *(block_ptr_node + new_size) = offset_size;
 
-    int *block_ptr_node_neighbor = block_ptr_node + new_size;
-
-    *block_ptr_node_neighbor = offset_size | 0;
-    *(block_ptr_node_neighbor + offset_size) = offset_size | 0;
-
-
-    //TODO: CHECK BOUNDARY CONDITIONS
-    if (new_size < old_size) {
-        *(block_ptr_node + new_size) = old_size - new_size;
+    // Mark neighbor node
+    if (offset_size > 0) {
+        int *block_ptr_node_neighbor = block_ptr_node + new_size;
+        *block_ptr_node_neighbor = offset_size | 0;
+        *(block_ptr_node_neighbor + offset_size) = offset_size | 0;
     }
 
 	return block_ptr_node;
