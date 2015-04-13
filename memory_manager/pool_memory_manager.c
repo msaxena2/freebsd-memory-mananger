@@ -36,15 +36,17 @@ struct main_block_list * block_list_ptr = NULL;
  */
 void * first_fit_add(void * block_ptr, size_t size) {
     int *block_ptr_node = (int *)block_ptr;
+    // Always round the size up to the nearest even number. It makes implementation of doubly coalescing list much easier
+    int adjusted_size = (size >> 1) << 1;
     int node_is_taken = (*block_ptr_node & 1) == 1;
-    int node_is_not_big_enough = (*block_ptr_node - 2 < size);
+    int node_is_not_big_enough = (*block_ptr_node - 2 < adjusted_size);
     int block_is_not_full = (void*)block_ptr_node - block_ptr < BLOCK_SIZE;
     int found_node_for_alloc = block_is_not_full && (node_is_taken || node_is_not_big_enough);
     
     while (!found_node_for_alloc)) { // TODO: size-2 requirement should be relaxed. If the first requested size is 8MB, it should still be able to serve.
         block_ptr_node = block_ptr_node + (*block_ptr_node & -2);
         node_is_taken = (*block_ptr_node & 1);
-        node_is_not_big_enough = (*block_ptr_node - 2 >= size);
+        node_is_not_big_enough = (*block_ptr_node - 2 < adjusted_size);
         block_is_not_full = (void*)block_ptr_node - block_ptr < BLOCK_SIZE;
         found_node_for_alloc = block_is_not_full && (node_is_taken || node_is_not_big_enough);
     }
