@@ -48,6 +48,21 @@ void * first_fit_add(void * block_ptr, size_t size) {
         block_is_not_full = (void*)block_ptr_node - block_ptr < BLOCK_SIZE;
         found_node_for_alloc = block_is_not_full && (node_is_taken || node_is_not_big_enough);
     }
+
+    if (!found_node_for_alloc) {
+        if (!block_is_not_full) {
+            printf("Block is full for block_ptr %p\n", block_ptr);
+        }
+
+        if (node_is_taken) {
+            printf("All nodes are taken for block %p\n", block_ptr);
+        }
+
+        if (node_is_not_big_enough) {
+            printf("Could not find a node that could fit size %i for block_ptr %p\n", size, block_ptr);
+        }
+
+        return NULL;
     }
 
     int new_size = ((size + 2) >> 1) << 1; // This creates a bit flag in the LSB. We use this to flag if the chunk is used
