@@ -36,7 +36,7 @@ struct main_block_list * block_list_ptr = NULL;
  */
 void * first_fit_add(void * block_ptr, size_t size) {
     int *block_ptr_node = (int *)block_ptr;
-    while ((block_ptr - (void*)block_ptr_node < BLOCK_SIZE) &&  // FIXME: Right way to check if the pointer went above boundary?
+    while (((void*)block_ptr_node - block_ptr < BLOCK_SIZE) &&  // FIXME: Right way to check if the pointer went above boundary?
             ((*block_ptr_node & 1) || (*block_ptr_node <= size - 2))) { // TODO: size-2 requirement should be relaxed. If the first requested size is 8MB, it should still be able to serve.
         block_ptr_node = block_ptr_node + (*block_ptr_node & -2);
     }
