@@ -129,7 +129,8 @@ void free(void * ptr) {
     // Check right neighbor
     if ((block_ptr_node + *block_ptr_node) & 1 == 0) { // TODO: Check right boundary;
         int *right_neighbor = block_ptr_node + *block_ptr_node;
-        *(right_neighbor + (*right_neighbor - 1)) = *block_ptr_node + *right_neighbor;// update tail buffer of right_neighbor
+        *block_ptr_node = *block_ptr_node + *right_neighbor;
+        *(block_ptr_node + (*block_ptr_node -1)) = *block_ptr_node;
     }
 }
 
