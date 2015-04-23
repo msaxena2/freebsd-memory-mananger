@@ -10,6 +10,9 @@
 /* Block size is 8 MB */
 #define BLOCK_SIZE 8000000
 
+/* Smallest memory block size */
+#define GRAIN_SIZE 8
+
 /*
  * Struct for the dictionary containing the list of blocks
  */
@@ -26,6 +29,12 @@ struct main_block_list {
  */
 struct main_block_list * block_list_ptr = NULL;
 
+/* Given a size, finds the best size to allow for fit
+ *
+ */
+int find_fit_size(size_t size) {
+	return (size + (GRAIN_SIZE /2)) / GRAIN_SIZE;
+}
 
 /*
  * Given a block, method follows first fit strategy to find the
