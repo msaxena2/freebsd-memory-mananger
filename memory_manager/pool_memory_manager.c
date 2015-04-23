@@ -112,6 +112,7 @@ void * compressed_alloc(size_t size) {
 }
 
 void free(void * ptr) {
+	/*
     int *block_ptr_node = (int *)ptr;
 
     int size_of_ptr_block = *block_ptr_node;
@@ -132,5 +133,6 @@ void free(void * ptr) {
         *block_ptr_node = *block_ptr_node + *right_neighbor;
         *(block_ptr_node + (*block_ptr_node -1)) = *block_ptr_node;
     }
+    */
 }
 
