@@ -43,7 +43,7 @@ void * first_fit_add(void * block_ptr, size_t size) {
     int block_is_not_full = (void*)block_ptr_node - block_ptr < BLOCK_SIZE;
     int found_node_for_alloc = block_is_not_full && (node_is_taken || node_is_not_big_enough);
     
-    while (!found_node_for_alloc)) { // TODO: size-2 requirement should be relaxed. If the first requested size is 8MB, it should still be able to serve.
+    while (!found_node_for_alloc) { // TODO: size-2 requirement should be relaxed. If the first requested size is 8MB, it should still be able to serve.
         block_ptr_node = block_ptr_node + (*block_ptr_node & -2);
         node_is_taken = (*block_ptr_node & 1);
         node_is_not_big_enough = (*block_ptr_node - 2 < adjusted_size);
@@ -61,7 +61,7 @@ void * first_fit_add(void * block_ptr, size_t size) {
         }
 
         if (node_is_not_big_enough) {
-            printf("Could not find a node that could fit size %i for block_ptr %p\n", size, block_ptr);
+            printf("Could not find a node that could fit size %zu for block_ptr %p\n", size, block_ptr);
         }
 
         return NULL;
@@ -119,7 +119,7 @@ void free(void * ptr) {
     *(block_ptr_node + size_of_ptr_block) |= 0;
 
     // Check left neighbor
-    if ((block_ptr_node - 1) & 1 == 0) { // TODO: Check left boundary
+    if (((block_ptr_node - 1) & 1) == 0) { // TODO: Check left boundary
         int *left_neigbor = block_ptr_node - *block_ptr_node;
         *left_neigbor = (*left_neigbor + size_of_ptr_block);
         *(left_neigbor + (*left_neigbor - 1)) = *left_neigbor;
@@ -127,7 +127,7 @@ void free(void * ptr) {
     }
 
     // Check right neighbor
-    if ((block_ptr_node + *block_ptr_node) & 1 == 0) { // TODO: Check right boundary;
+    if (((block_ptr_node + *block_ptr_node) & 1) == 0) { // TODO: Check right boundary;
         int *right_neighbor = block_ptr_node + *block_ptr_node;
         *block_ptr_node = *block_ptr_node + *right_neighbor;
         *(block_ptr_node + (*block_ptr_node -1)) = *block_ptr_node;
