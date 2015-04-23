@@ -29,11 +29,12 @@ struct main_block_list {
  */
 struct main_block_list * block_list_ptr = NULL;
 
-/* Given a size, finds the best size to allow for fit
+/* Given a size, finds the best size to allow for fit.
+ * Might be needed later for more complex arithmatic.
  *
  */
 int find_fit_size(size_t size) {
-	return (size + (GRAIN_SIZE /2)) / GRAIN_SIZE;
+	return (size + (GRAIN_SIZE / 2)) / GRAIN_SIZE;
 }
 
 /*
@@ -44,52 +45,57 @@ int find_fit_size(size_t size) {
  * coalescing.
  */
 void * first_fit_add(void * block_ptr, size_t size) {
-    int *block_ptr_node = (int *)block_ptr;
-    // Always round the size up to the nearest even number. It makes implementation of doubly coalescing list much easier
-    int adjusted_size = (size >> 1) << 1;
-    int node_is_taken = (*block_ptr_node & 1) == 1;
-    int node_is_not_big_enough = (*block_ptr_node - 2 < adjusted_size);
-    int block_is_not_full = (void*)block_ptr_node - block_ptr < BLOCK_SIZE;
-    int found_node_for_alloc = block_is_not_full && (node_is_taken || node_is_not_big_enough);
-    
-    while (!found_node_for_alloc) { // TODO: size-2 requirement should be relaxed. If the first requested size is 8MB, it should still be able to serve.
-        block_ptr_node = block_ptr_node + (*block_ptr_node & -2);
-        node_is_taken = (*block_ptr_node & 1);
-        node_is_not_big_enough = (*block_ptr_node - 2 < adjusted_size);
-        block_is_not_full = (void*)block_ptr_node - block_ptr < BLOCK_SIZE;
-        found_node_for_alloc = block_is_not_full && (node_is_taken || node_is_not_big_enough);
-    }
+	int *block_ptr_node = (int *) block_ptr;
+	// Always round the size up to the nearest even number. It makes implementation of doubly coalescing list much easier
+	int adjusted_size = find_fit_size(size);
+	int node_is_taken = (*block_ptr_node & 1) == 1;
+	int node_is_not_big_enough = (*block_ptr_node - (2 * (sizeof(int)))
+			< adjusted_size);
+	int block_is_not_full = (((void*) block_ptr_node) - block_ptr) < BLOCK_SIZE;
+	int found_node_for_alloc = block_is_not_full
+			&& (node_is_taken || node_is_not_big_enough);
 
-    if (!found_node_for_alloc) {
-        if (!block_is_not_full) {
-            printf("Block is full for block_ptr %p\n", block_ptr);
-        }
+	while (!found_node_for_alloc) { // TODO: size-2 requirement should be relaxed. If the first requested size is 8MB, it should still be able to serve.
+		block_ptr_node = block_ptr_node + (*block_ptr_node & -2);
+		node_is_taken = (*block_ptr_node & 1);
+		node_is_not_big_enough = (*block_ptr_node - 2 < adjusted_size);
+		block_is_not_full = (void*) block_ptr_node - block_ptr < BLOCK_SIZE;
+		found_node_for_alloc = block_is_not_full
+				&& (node_is_taken || node_is_not_big_enough);
+	}
 
-        if (node_is_taken) {
-            printf("All nodes are taken for block %p\n", block_ptr);
-        }
+	if (!found_node_for_alloc) {
+		if (!block_is_not_full) {
+			printf("Block is full for block_ptr %p\n", block_ptr);
+		}
 
-        if (node_is_not_big_enough) {
-            printf("Could not find a node that could fit size %zu for block_ptr %p\n", size, block_ptr);
-        }
+		if (node_is_taken) {
+			printf("All nodes are taken for block %p\n", block_ptr);
+		}
 
-        return NULL;
-    }
+		if (node_is_not_big_enough) {
+			printf(
+					"Could not find a node that could fit size %zu for block_ptr %p\n",
+					size, block_ptr);
+		}
 
-    int new_size = ((size + 2) >> 1) << 1; // This creates a bit flag in the LSB. We use this to flag if the chunk is used
-    int old_size = *block_ptr_node & -2;
-    int offset_size = old_size - new_size;
+		return NULL;
+	}
 
-    *block_ptr_node = new_size | 1;
-    *(block_ptr_node + new_size - 1) = new_size | 1; // set bit for tail buffer
-    *(block_ptr_node + new_size) = offset_size;
+	int new_size = ((size + 2) >> 1) << 1; // This creates a bit flag in the LSB. We use this to flag if the chunk is used
+	int old_size = *block_ptr_node & -2;
+	int offset_size = old_size - new_size;
 
-    // Mark neighbor node
-    if (offset_size > 0) {
-        int *block_ptr_node_neighbor = block_ptr_node + new_size;
-        *block_ptr_node_neighbor = offset_size | 0;
-        *(block_ptr_node_neighbor + offset_size) = offset_size | 0;
-    }
+	*block_ptr_node = new_size | 1;
+	*(block_ptr_node + new_size - 1) = new_size | 1; // set bit for tail buffer
+	*(block_ptr_node + new_size) = offset_size;
+
+	// Mark neighbor node
+	if (offset_size > 0) {
+		int *block_ptr_node_neighbor = block_ptr_node + new_size;
+		*block_ptr_node_neighbor = offset_size | 0;
+		*(block_ptr_node_neighbor + offset_size) = offset_size | 0;
+	}
 
 	return block_ptr_node;
 }
@@ -122,26 +128,26 @@ void * compressed_alloc(size_t size) {
 
 void free(void * ptr) {
 	/*
-    int *block_ptr_node = (int *)ptr;
+	 int *block_ptr_node = (int *)ptr;
 
-    int size_of_ptr_block = *block_ptr_node;
-    *block_ptr_node |= 0;
-    *(block_ptr_node + size_of_ptr_block) |= 0;
+	 int size_of_ptr_block = *block_ptr_node;
+	 *block_ptr_node |= 0;
+	 *(block_ptr_node + size_of_ptr_block) |= 0;
 
-    // Check left neighbor
-    if (((block_ptr_node - 1) & 1) == 0) { // TODO: Check left boundary
-        int *left_neigbor = block_ptr_node - *block_ptr_node;
-        *left_neigbor = (*left_neigbor + size_of_ptr_block);
-        *(left_neigbor + (*left_neigbor - 1)) = *left_neigbor;
-        block_ptr_node = left_neigbor;
-    }
+	 // Check left neighbor
+	 if (((block_ptr_node - 1) & 1) == 0) { // TODO: Check left boundary
+	 int *left_neigbor = block_ptr_node - *block_ptr_node;
+	 *left_neigbor = (*left_neigbor + size_of_ptr_block);
+	 *(left_neigbor + (*left_neigbor - 1)) = *left_neigbor;
+	 block_ptr_node = left_neigbor;
+	 }
 
-    // Check right neighbor
-    if (((block_ptr_node + *block_ptr_node) & 1) == 0) { // TODO: Check right boundary;
-        int *right_neighbor = block_ptr_node + *block_ptr_node;
-        *block_ptr_node = *block_ptr_node + *right_neighbor;
-        *(block_ptr_node + (*block_ptr_node -1)) = *block_ptr_node;
-    }
-    */
+	 // Check right neighbor
+	 if (((block_ptr_node + *block_ptr_node) & 1) == 0) { // TODO: Check right boundary;
+	 int *right_neighbor = block_ptr_node + *block_ptr_node;
+	 *block_ptr_node = *block_ptr_node + *right_neighbor;
+	 *(block_ptr_node + (*block_ptr_node -1)) = *block_ptr_node;
+	 }
+	 */
 }
 
