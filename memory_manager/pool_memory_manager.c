@@ -92,10 +92,13 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	split_setter(adjusted_size, block_ptr_node);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ adjusted_size;
-	split_setter(adjusted_size, block_ptr_node);
+	split_setter(adjusted_size, (struct indicator_data *)void_block_ptr);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data);
-	split_setter(adjusted_size, block_ptr_node);
-
+	size_t new_capacity = original_capacity - adjusted_size;
+	split_setter(new_capacity, (struct indicator_data *)void_block_ptr);
+	void_block_ptr = void_block_ptr +sizeof(struct indicator_data) + new_capacity;
+	split_setter(new_capacity, (struct indicator_data *)void_block_ptr);
+	return ((void *)(block_ptr_node + 1));
 }
 
 void * compressed_alloc(size_t size) {
