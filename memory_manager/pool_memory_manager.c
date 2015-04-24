@@ -54,58 +54,8 @@ int find_fit_size(size_t size) {
  */
 void * first_fit_add(void * block_ptr, size_t size) {
 	struct indicator_data *block_ptr_node = (struct indicator_data *) block_ptr;
-	// Always round the size up to the nearest even number. It makes implementation of doubly coalescing list much easier
-	int adjusted_size = find_fit_size(size);
-	int node_is_taken = block_ptr_node->occupied;
-	int node_is_big_enough = (block_ptr_node->block_size - (2 * (sizeof(struct block_ptr_node)))
-			< adjusted_size);
-	int block_is_not_full = (((void*) block_ptr_node) - block_ptr) < BLOCK_SIZE;
-	int found_node_for_alloc = block_is_not_full
-			&& !node_is_taken && node_is_big_enough;
 
-	while (!found_node_for_alloc) { // TODO: size-2 requirement should be relaxed. If the first requested size is 8MB, it should still be able to serve.
-		block_ptr_node = block_ptr_node + (*block_ptr_node & -2);
-		node_is_taken = (*block_ptr_node & 1);
-		node_is_big_enough = (*block_ptr_node - 2 < adjusted_size);
-		block_is_not_full = (void*) block_ptr_node - block_ptr < BLOCK_SIZE;
-		found_node_for_alloc = block_is_not_full
-				&& (node_is_taken || node_is_big_enough);
-	}
 
-	if (!found_node_for_alloc) {
-		if (!block_is_not_full) {
-			printf("Block is full for block_ptr %p\n", block_ptr);
-		}
-
-		if (node_is_taken) {
-			printf("All nodes are taken for block %p\n", block_ptr);
-		}
-
-		if (node_is_big_enough) {
-			printf(
-					"Could not find a node that could fit size %zu for block_ptr %p\n",
-					size, block_ptr);
-		}
-
-		return NULL;
-	}
-
-	int new_size = ((size + 2) >> 1) << 1; // This creates a bit flag in the LSB. We use this to flag if the chunk is used
-	int old_size = *block_ptr_node & -2;
-	int offset_size = old_size - new_size;
-
-	*block_ptr_node = new_size | 1;
-	*(block_ptr_node + new_size - 1) = new_size | 1; // set bit for tail buffer
-	*(block_ptr_node + new_size) = offset_size;
-
-	// Mark neighbor node
-	if (offset_size > 0) {
-		int *block_ptr_node_neighbor = block_ptr_node + new_size;
-		*block_ptr_node_neighbor = offset_size | 0;
-		*(block_ptr_node_neighbor + offset_size) = offset_size | 0;
-	}
-
-	return block_ptr_node;
 }
 
 void * compressed_alloc(size_t size) {
