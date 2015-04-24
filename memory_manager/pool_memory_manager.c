@@ -106,7 +106,7 @@ void * create_block() {
 	struct main_block_list * block_list_ptr = (struct main_block_list*) malloc(
 			sizeof(struct main_block_list));
 	block_list_ptr->block_ptr = malloc(
-			sizeof(BLOCK_SIZE) + 2 * sizeof(struct indicator_data));
+			BLOCK_SIZE + 2 * sizeof(struct indicator_data));
 	void * data_ptr = (void *) block_list_ptr->block_ptr;
 	struct indicator_data * indicator_ptr = (struct indicator_data *) data_ptr;
 	indicator_ptr->block_size = BLOCK_SIZE;
