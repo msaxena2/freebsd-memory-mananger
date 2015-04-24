@@ -45,6 +45,11 @@ int find_fit_size(size_t size) {
 	return (size + (GRAIN_SIZE / 2)) / GRAIN_SIZE;
 }
 
+void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node) {
+	block_ptr_node->block_size = adjusted_size;
+	block_ptr_node->occupied = 1;
+}
+
 /*
  * Given a block, method follows first fit strategy to find the
  * first memory space which can accommodate the requested space.
@@ -73,15 +78,23 @@ void * first_fit_add(void * block_ptr, size_t size) {
 		}
 		block_ptr_node = (struct indicator_data *) void_block_ptr;
 	}
+
 	/* suitable block has been found */
 
-	/* finding if shrinking should happen */
+	/* finding if splitting should happen */
 	if ((block_ptr_node->block_size - (adjusted_size))
 			< (2 * sizeof(struct indicator_data) + find_fit_size(1))) {
 		return void_block_ptr + sizeof(struct indicator_data);
 	}
 
-	/* shrinking can occur */
+	/* splitting can occur */
+	int original_capacity = block_ptr_node->block_size;
+	split_setter(adjusted_size, block_ptr_node);
+	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
+			+ adjusted_size;
+	split_setter(adjusted_size, block_ptr_node);
+	void_block_ptr = void_block_ptr + sizeof(struct indicator_data);
+	split_setter(adjusted_size, block_ptr_node);
 
 }
 
