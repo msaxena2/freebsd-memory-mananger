@@ -54,8 +54,28 @@ int find_fit_size(size_t size) {
  */
 void * first_fit_add(void * block_ptr, size_t size) {
 	struct indicator_data *block_ptr_node = (struct indicator_data *) block_ptr;
+	size_t adjusted_size = find_fit_size(size);
 
+	int suitable_block_found = 0;
+	while (!suitable_block_found) {
+		if ((!block_ptr_node->occupied)
+				&& (block_ptr_node->block_size >= adjusted_size)) {
+			suitable_block_found = 1;
+			continue;
+		}
+		/* move forward to the next suitable one */
+		block_ptr_node = ((void *) block_ptr_node)
+				+ (2 * sizeof(struct indicator_data))
+				+ (block_ptr_node->block_size);
 
+		if (((void *) block_ptr_node + sizeof(struct indicator_data))
+				>= (block_ptr) + BLOCK_SIZE) {
+			/* no suitable block in this node */
+			return NULL;
+		}
+	}
+	/* suitable block has been found */
+	return NULL;
 }
 
 void * compressed_alloc(size_t size) {
