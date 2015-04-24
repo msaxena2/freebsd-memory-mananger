@@ -105,7 +105,16 @@ void * first_fit_add(void * block_ptr, size_t size) {
 void * create_block() {
 	struct main_block_list * block_list_ptr = (struct main_block_list*) malloc(
 			sizeof(struct main_block_list));
-	block_list_ptr->block_ptr = malloc(sizeof(BLOCK_SIZE));
+	block_list_ptr->block_ptr = malloc(
+			sizeof(BLOCK_SIZE) + 2 * sizeof(struct indicator_data));
+	void * data_ptr = (void *) block_list_ptr->block_ptr;
+	struct indicator_data * indicator_ptr = (struct indicator_data *) data_ptr;
+	indicator_ptr->block_size = BLOCK_SIZE;
+	indicator_ptr->occupied = 0;
+	data_ptr = data_ptr + sizeof(struct indicator_data) + BLOCK_SIZE;
+	indicator_ptr = (struct indicator_data *) data_ptr;
+	indicator_ptr->block_size = BLOCK_SIZE;
+	indicator_ptr->occupied = 0;
 	INIT_LIST_HEAD(&(block_list_ptr->node));
 	return block_list_ptr;
 }
@@ -134,7 +143,6 @@ void * compressed_alloc(size_t size) {
 	list_add_tail(&(new_block->node), &(block_list_ptr->node));
 	return first_fit_add(new_block->block_ptr, size);
 }
-
 
 void free(void * ptr) {
 	/*
