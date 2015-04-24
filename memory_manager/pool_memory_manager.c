@@ -58,7 +58,6 @@ void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node) {
  * coalescing.
  */
 void * first_fit_add(void * block_ptr, size_t size) {
-	printf("first fit add called \n");
 	struct indicator_data *block_ptr_node = (struct indicator_data *) block_ptr;
 	void * void_block_ptr = block_ptr;
 	size_t adjusted_size = find_fit_size(size);
@@ -102,11 +101,14 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	split_setter(new_capacity, (struct indicator_data *) void_block_ptr);
 	return ((void *) (block_ptr_node + 1));
 }
+/*
+ * Helper function to create a new node block for the linked list.
+ */
 void * create_block() {
 	struct main_block_list * block_list_ptr = (struct main_block_list*) malloc(
 			sizeof(struct main_block_list));
 	block_list_ptr->block_ptr = malloc(
-			BLOCK_SIZE + 2 * sizeof(struct indicator_data));
+	BLOCK_SIZE + 2 * sizeof(struct indicator_data));
 	void * data_ptr = (void *) block_list_ptr->block_ptr;
 	struct indicator_data * indicator_ptr = (struct indicator_data *) data_ptr;
 	indicator_ptr->block_size = BLOCK_SIZE;
