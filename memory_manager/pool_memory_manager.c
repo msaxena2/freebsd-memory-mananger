@@ -102,33 +102,39 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	split_setter(new_capacity, (struct indicator_data *) void_block_ptr);
 	return ((void *) (block_ptr_node + 1));
 }
+void * create_block() {
+	struct main_block_list * block_list_ptr = (struct main_block_list*) malloc(
+			sizeof(struct main_block_list));
+	block_list_ptr->block_ptr = malloc(sizeof(BLOCK_SIZE));
+	INIT_LIST_HEAD(&(block_list_ptr->node));
+	return block_list_ptr;
+}
 
 void * compressed_alloc(size_t size) {
-	printf("compressed alloc called\n");
 	/* case of first alloc */
 	if (!block_list_ptr) {
-		block_list_ptr = (struct main_block_list *) malloc(
-				sizeof(struct main_block_list));
-		block_list_ptr->block_ptr = malloc(sizeof(BLOCK_SIZE));
-		INIT_LIST_HEAD(&(block_list_ptr->node));
+		block_list_ptr = create_block();
 	}
-
 	/* First fit strategy for the blocks */
-	struct list_head * pos;
+	struct list_head *pos;
 	struct main_block_list * curr_node;
 
 	/*traverse each block to find an empty block */
 	list_for_each(pos, &(block_list_ptr->node))
 	{
 		curr_node = list_entry(pos, struct main_block_list, node);
-		void * ret_ptr = first_fit_add(curr_node, size);
+		void * ret_ptr = first_fit_add(curr_node->block_ptr, size);
 		/* successful addition happened at one of the blocks */
-		if (!ret_ptr) {
+		if (ret_ptr) {
 			return ret_ptr;
 		}
 	}
-	return NULL;
+	/* create a new block, guaranteed to have enough space */
+	struct main_block_list * new_block = create_block();
+	list_add_tail(&(new_block->node), &(block_list_ptr->node));
+	return first_fit_add(new_block->block_ptr, size);
 }
+
 
 void free(void * ptr) {
 	/*
