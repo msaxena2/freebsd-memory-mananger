@@ -57,19 +57,16 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	void * void_block_ptr = block_ptr;
 	size_t adjusted_size = find_fit_size(size);
 
-	int suitable_block_found = 0;
-	while (!suitable_block_found) {
+	while (1) {
 		if ((!block_ptr_node->occupied)
 				&& (block_ptr_node->block_size >= adjusted_size)) {
-			suitable_block_found = 1;
-			continue;
+			break;
 		}
 		/* move forward to the next suitable one */
-		void_block_ptr = void_block_ptr
-				+ (2 * sizeof(struct indicator_data))
+		void_block_ptr = void_block_ptr + (2 * sizeof(struct indicator_data))
 				+ (block_ptr_node->block_size);
 
-		if ((void_block_ptr+ sizeof(struct indicator_data))
+		if ((void_block_ptr + sizeof(struct indicator_data))
 				>= (block_ptr) + BLOCK_SIZE) {
 			/* no suitable block in this node */
 			return NULL;
@@ -77,7 +74,14 @@ void * first_fit_add(void * block_ptr, size_t size) {
 		block_ptr_node = (struct indicator_data *) void_block_ptr;
 	}
 	/* suitable block has been found */
-	return NULL;
+
+	/* finding if shrinking should happen */
+	if ((block_ptr_node->block_size - (adjusted_size))
+			< (2 * sizeof(struct indicator_data) + find_fit_size(1))) {
+		return void_block_ptr + sizeof(struct indicator_data);
+	}
+
+	/* shrinking can occur */
 
 }
 
