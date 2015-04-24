@@ -58,6 +58,7 @@ void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node) {
  * coalescing.
  */
 void * first_fit_add(void * block_ptr, size_t size) {
+	printf("first fit add called \n");
 	struct indicator_data *block_ptr_node = (struct indicator_data *) block_ptr;
 	void * void_block_ptr = block_ptr;
 	size_t adjusted_size = find_fit_size(size);
@@ -92,16 +93,18 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	split_setter(adjusted_size, block_ptr_node);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ adjusted_size;
-	split_setter(adjusted_size, (struct indicator_data *)void_block_ptr);
+	split_setter(adjusted_size, (struct indicator_data *) void_block_ptr);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data);
 	size_t new_capacity = original_capacity - adjusted_size;
-	split_setter(new_capacity, (struct indicator_data *)void_block_ptr);
-	void_block_ptr = void_block_ptr +sizeof(struct indicator_data) + new_capacity;
-	split_setter(new_capacity, (struct indicator_data *)void_block_ptr);
-	return ((void *)(block_ptr_node + 1));
+	split_setter(new_capacity, (struct indicator_data *) void_block_ptr);
+	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
+			+ new_capacity;
+	split_setter(new_capacity, (struct indicator_data *) void_block_ptr);
+	return ((void *) (block_ptr_node + 1));
 }
 
 void * compressed_alloc(size_t size) {
+	printf("compressed alloc called\n");
 	/* case of first alloc */
 	if (!block_list_ptr) {
 		block_list_ptr = (struct main_block_list *) malloc(
