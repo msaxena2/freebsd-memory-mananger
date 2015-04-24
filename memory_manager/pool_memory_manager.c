@@ -25,6 +25,14 @@ struct main_block_list {
 };
 
 /*
+ * Struct to hold the size of the data, and indicate whether its occupied or not.
+ */
+struct indicator_data {
+	size_t block_size;
+	int occupied;
+};
+
+/*
  * List containing the block pointers
  */
 struct main_block_list * block_list_ptr = NULL;
@@ -45,11 +53,11 @@ int find_fit_size(size_t size) {
  * coalescing.
  */
 void * first_fit_add(void * block_ptr, size_t size) {
-	int *block_ptr_node = (int *) block_ptr;
+	struct indicator_data *block_ptr_node = (struct indicator_data *) block_ptr;
 	// Always round the size up to the nearest even number. It makes implementation of doubly coalescing list much easier
 	int adjusted_size = find_fit_size(size);
-	int node_is_taken = (*block_ptr_node & 1) == 1;
-	int node_is_big_enough = (*block_ptr_node - (2 * (sizeof(int)))
+	int node_is_taken = block_ptr_node->occupied;
+	int node_is_big_enough = (block_ptr_node->block_size - (2 * (sizeof(struct block_ptr_node)))
 			< adjusted_size);
 	int block_is_not_full = (((void*) block_ptr_node) - block_ptr) < BLOCK_SIZE;
 	int found_node_for_alloc = block_is_not_full
