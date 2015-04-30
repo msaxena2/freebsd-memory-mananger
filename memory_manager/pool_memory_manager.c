@@ -13,6 +13,10 @@
 /* Smallest memory block size */
 #define GRAIN_SIZE 8
 
+#define OCCUPIED 1
+
+#define UNOCCUPIED 0
+
 /*
  * Struct for the dictionary containing the list of blocks
  */
@@ -46,9 +50,9 @@ int find_fit_size(size_t size) {
 	return ((size + GRAIN_SIZE - 1) / GRAIN_SIZE) * GRAIN_SIZE;
 }
 
-void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node) {
+void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node, int occupied) {
 	block_ptr_node->block_size = adjusted_size;
-	block_ptr_node->occupied = 1;
+	block_ptr_node->occupied = occupied;
 }
 
 /*
@@ -92,16 +96,16 @@ void * first_fit_add(void * block_ptr, size_t size) {
 
 	/* splitting can occur */
 	int original_capacity = block_ptr_node->block_size;
-	split_setter(adjusted_size, block_ptr_node);
+	split_setter(adjusted_size, block_ptr_node, OCCUPIED);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ adjusted_size;
-	split_setter(adjusted_size, (struct indicator_data *) void_block_ptr);
+	split_setter(adjusted_size, (struct indicator_data *) void_block_ptr, OCCUPIED);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data);
-	size_t new_capacity = original_capacity - adjusted_size;
-	split_setter(new_capacity, (struct indicator_data *) void_block_ptr);
+	size_t new_capacity = original_capacity - adjusted_size - (2 * sizeof(struct indicator_data));
+	split_setter(new_capacity, (struct indicator_data *) void_block_ptr, UNOCCUPIED);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ new_capacity;
-	split_setter(new_capacity, (struct indicator_data *) void_block_ptr);
+	split_setter(new_capacity, (struct indicator_data *) void_block_ptr, UNOCCUPIED);
 	return ((void *) (block_ptr_node + 1));
 }
 /*
