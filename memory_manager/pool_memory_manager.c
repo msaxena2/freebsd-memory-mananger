@@ -14,8 +14,10 @@
 #define GRAIN_SIZE 8
 
 /* Flags for occupied/unoccupied */
-#define OCCUPIED 1
 #define UNOCCUPIED 0
+#define OCCUPIED 1
+#define UNOCCUPIEDFB 2
+#define OCCUPIEDFB 3
 
 /*
  * Struct for the dictionary containing the list of blocks
@@ -56,7 +58,13 @@ int find_fit_size(size_t size) {
 void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node,
 		int occupied) {
 	block_ptr_node->block_size = adjusted_size;
-	block_ptr_node->occupied = occupied;
+	/* Set according to block location */
+	if(block_ptr_node->occupied > 1) {
+		block_ptr_node->occupied = occupied + 2;
+	}
+	else {
+		block_ptr_node->occupied = occupied;
+	}
 }
 
 /*
@@ -126,11 +134,11 @@ void * create_block() {
 	void * data_ptr = (void *) block_list_ptr->block_ptr;
 	struct indicator_data * indicator_ptr = (struct indicator_data *) data_ptr;
 	indicator_ptr->block_size = BLOCK_SIZE;
-	indicator_ptr->occupied = 0;
+	indicator_ptr->occupied = UNOCCUPIEDFB;
 	data_ptr = data_ptr + sizeof(struct indicator_data) + BLOCK_SIZE;
 	indicator_ptr = (struct indicator_data *) data_ptr;
 	indicator_ptr->block_size = BLOCK_SIZE;
-	indicator_ptr->occupied = 0;
+	indicator_ptr->occupied = UNOCCUPIEDFB;
 	INIT_LIST_HEAD(&(block_list_ptr->node));
 	return block_list_ptr;
 }
@@ -160,28 +168,11 @@ void * compressed_alloc(size_t size) {
 	return first_fit_add(new_block->block_ptr, size);
 }
 
+/*
+ * Given a block, marked it as free for use.
+ * Coalesce with other nearby blocks if they're also free.
+ */
 void free(void * ptr) {
-	/*
-	 int *block_ptr_node = (int *)ptr;
 
-	 int size_of_ptr_block = *block_ptr_node;
-	 *block_ptr_node |= 0;
-	 *(block_ptr_node + size_of_ptr_block) |= 0;
-
-	 // Check left neighbor
-	 if (((block_ptr_node - 1) & 1) == 0) { // TODO: Check left boundary
-	 int *left_neigbor = block_ptr_node - *block_ptr_node;
-	 *left_neigbor = (*left_neigbor + size_of_ptr_block);
-	 *(left_neigbor + (*left_neigbor - 1)) = *left_neigbor;
-	 block_ptr_node = left_neigbor;
-	 }
-
-	 // Check right neighbor
-	 if (((block_ptr_node + *block_ptr_node) & 1) == 0) { // TODO: Check right boundary;
-	 int *right_neighbor = block_ptr_node + *block_ptr_node;
-	 *block_ptr_node = *block_ptr_node + *right_neighbor;
-	 *(block_ptr_node + (*block_ptr_node -1)) = *block_ptr_node;
-	 }
-	 */
 }
 
