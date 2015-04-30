@@ -13,8 +13,8 @@
 /* Smallest memory block size */
 #define GRAIN_SIZE 8
 
+/* Flags for occupied/unoccupied */
 #define OCCUPIED 1
-
 #define UNOCCUPIED 0
 
 /*
