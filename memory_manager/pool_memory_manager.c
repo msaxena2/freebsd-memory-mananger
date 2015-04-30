@@ -42,7 +42,8 @@ struct main_block_list * block_list_ptr = NULL;
  *
  */
 int find_fit_size(size_t size) {
-	return (size + (GRAIN_SIZE / 2)) / GRAIN_SIZE;
+	/* Simple rounding up in this case, can have more complicated operations as well */
+	return ((size + GRAIN_SIZE - 1) / GRAIN_SIZE) * GRAIN_SIZE;
 }
 
 void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node) {
@@ -61,7 +62,7 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	struct indicator_data *block_ptr_node = (struct indicator_data *) block_ptr;
 	void * void_block_ptr = block_ptr;
 	size_t adjusted_size = find_fit_size(size);
-
+	printf("requested adjusted size is %zu\n", adjusted_size);
 	while (1) {
 		if ((!block_ptr_node->occupied)
 				&& (block_ptr_node->block_size >= adjusted_size)) {
