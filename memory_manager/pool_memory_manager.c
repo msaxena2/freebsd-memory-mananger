@@ -63,6 +63,8 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	void * void_block_ptr = block_ptr;
 	size_t adjusted_size = find_fit_size(size);
 	printf("requested adjusted size is %zu\n", adjusted_size);
+	void * rear_ptr = void_block_ptr + sizeof(struct indicator_data) + block_ptr_node->block_size;
+	printf("size from rear is %zu\n", ((struct indicator_data *) rear_ptr)->block_size);
 	while (1) {
 		if ((!block_ptr_node->occupied)
 				&& (block_ptr_node->block_size >= adjusted_size)) {
