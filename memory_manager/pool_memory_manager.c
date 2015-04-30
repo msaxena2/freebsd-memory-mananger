@@ -198,10 +198,17 @@ struct indicator_data * merge_previous_block(struct indicator_data * curr_block)
 }
 
 /*
+ * Private function to merge the next block, if possible
+ */
+
+
+
+/*
  * Given a block, marked it as free for use.
  * Coalesce with other nearby blocks if they're also free.
  */
 void free(void * ptr) {
+	struct indicator_data * new_blk_ptr = merge_previous_block((struct indicator_data *) ptr);
 
 }
 
