@@ -74,13 +74,13 @@ void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node,
  * coalescing.
  */
 void * first_fit_add(void * block_ptr, size_t size) {
-	printf("add called"\n);
 	struct indicator_data *block_ptr_node = (struct indicator_data *) block_ptr;
 	void * void_block_ptr = block_ptr;
 	size_t adjusted_size = find_fit_size(size);
 
 	while (1) {
-		if ((!block_ptr_node->occupied)
+		if (((block_ptr_node->occupied == OCCUPIED)
+				|| (block_ptr_node->occupied == UNOCCUPIEDFB))
 				&& (block_ptr_node->block_size >= adjusted_size)) {
 			break;
 		}
