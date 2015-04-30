@@ -9,7 +9,7 @@
 #include "../pool_memory_manager.h"
 
 #define DUMMY_INT 151
-#define DUMMY_ITERATIONS 1
+#define DUMMY_ITERATIONS 50
 #define DUMMY_INT_ARRAY_SIZE 500
 
 //int single_alloc_test() {

@@ -50,7 +50,11 @@ int find_fit_size(size_t size) {
 	return ((size + GRAIN_SIZE - 1) / GRAIN_SIZE) * GRAIN_SIZE;
 }
 
-void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node, int occupied) {
+/* Creates the split for the block. Needs the size
+ * and status of occupancy
+ */
+void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node,
+		int occupied) {
 	block_ptr_node->block_size = adjusted_size;
 	block_ptr_node->occupied = occupied;
 }
@@ -66,9 +70,7 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	struct indicator_data *block_ptr_node = (struct indicator_data *) block_ptr;
 	void * void_block_ptr = block_ptr;
 	size_t adjusted_size = find_fit_size(size);
-	printf("requested adjusted size is %zu\n", adjusted_size);
-	void * rear_ptr = void_block_ptr + sizeof(struct indicator_data) + block_ptr_node->block_size;
-	printf("size from rear is %zu\n", ((struct indicator_data *) rear_ptr)->block_size);
+
 	while (1) {
 		if ((!block_ptr_node->occupied)
 				&& (block_ptr_node->block_size >= adjusted_size)) {
@@ -99,19 +101,24 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	split_setter(adjusted_size, block_ptr_node, OCCUPIED);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ adjusted_size;
-	split_setter(adjusted_size, (struct indicator_data *) void_block_ptr, OCCUPIED);
+	split_setter(adjusted_size, (struct indicator_data *) void_block_ptr,
+			OCCUPIED);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data);
-	size_t new_capacity = original_capacity - adjusted_size - (2 * sizeof(struct indicator_data));
-	split_setter(new_capacity, (struct indicator_data *) void_block_ptr, UNOCCUPIED);
+	size_t new_capacity = original_capacity - adjusted_size
+			- (2 * sizeof(struct indicator_data));
+	split_setter(new_capacity, (struct indicator_data *) void_block_ptr,
+			UNOCCUPIED);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ new_capacity;
-	split_setter(new_capacity, (struct indicator_data *) void_block_ptr, UNOCCUPIED);
+	split_setter(new_capacity, (struct indicator_data *) void_block_ptr,
+			UNOCCUPIED);
 	return ((void *) (block_ptr_node + 1));
 }
 /*
  * Helper function to create a new node block for the linked list.
  */
 void * create_block() {
+	printf("new block created \n");
 	struct main_block_list * block_list_ptr = (struct main_block_list*) malloc(
 			sizeof(struct main_block_list));
 	block_list_ptr->block_ptr = malloc(
