@@ -2,7 +2,7 @@
  * pool_memory_manager.c
  *
  *  Created on: Apr 4, 2015
- *      Author: manasvi
+ *      Author: Manasvi Saxena (msaxena2@illinois.edu)
  */
 
 #include "pool_memory_manager.h"
@@ -59,10 +59,9 @@ void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node,
 		int occupied) {
 	block_ptr_node->block_size = adjusted_size;
 	/* Set according to block location */
-	if(block_ptr_node->occupied > 1) {
+	if (block_ptr_node->occupied > 1) {
 		block_ptr_node->occupied = occupied + 2;
-	}
-	else {
+	} else {
 		block_ptr_node->occupied = occupied;
 	}
 }
@@ -110,23 +109,22 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ adjusted_size;
 	split_setter(adjusted_size, (struct indicator_data *) void_block_ptr,
-			OCCUPIED);
+	OCCUPIED);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data);
 	size_t new_capacity = original_capacity - adjusted_size
 			- (2 * sizeof(struct indicator_data));
 	split_setter(new_capacity, (struct indicator_data *) void_block_ptr,
-			UNOCCUPIED);
+	UNOCCUPIED);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ new_capacity;
 	split_setter(new_capacity, (struct indicator_data *) void_block_ptr,
-			UNOCCUPIED);
+	UNOCCUPIED);
 	return ((void *) (block_ptr_node + 1));
 }
 /*
  * Helper function to create a new node block for the linked list.
  */
 void * create_block() {
-	printf("new block created \n");
 	struct main_block_list * block_list_ptr = (struct main_block_list*) malloc(
 			sizeof(struct main_block_list));
 	block_list_ptr->block_ptr = malloc(
@@ -166,6 +164,36 @@ void * compressed_alloc(size_t size) {
 	struct main_block_list * new_block = create_block();
 	list_add_tail(&(new_block->node), &(block_list_ptr->node));
 	return first_fit_add(new_block->block_ptr, size);
+}
+
+/* Private helper function to help with free
+ *
+ */
+struct indicator_data * merge_previous_block(struct indicator_data * curr_block) {
+	/* check if possible to merge the block with the previous one */
+	if (curr_block->occupied > 1) {
+		/* Current block is first one */
+		curr_block->occupied = UNOCCUPIEDFB;
+		return curr_block;
+	}
+	struct indicator_data * prev_block =
+			(struct indicator_data *) (((void *) curr_block)
+					- sizeof(struct indicator_data));
+
+	if (prev_block->occupied) {
+		return curr_block;
+	}
+
+	/* Merging is possible */
+	size_t new_capacity = prev_block->block_size + curr_block->block_size
+			+ 2 * sizeof(struct indicator_data);
+
+	struct indicator_data * original_block =
+			(struct indicator_data *) (((void *) prev_block)
+					- sizeof(struct indicator_data) - prev_block->block_size);
+
+	original_block->block_size = new_capacity;
+	return original_block;
 }
 
 /*
