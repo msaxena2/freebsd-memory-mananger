@@ -13,7 +13,7 @@ memory_manager/
 |-- resources
 |   |-- list.h
 |-- test
-|   `-- test_alloc.c
+|   |-- test_alloc.c
 
 ```
 
