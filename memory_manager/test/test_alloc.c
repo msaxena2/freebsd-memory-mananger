@@ -24,7 +24,7 @@ int single_alloc_test() {
 		printf("--Simple Single compressed Alloc Test Failed\n--");
 		return (1);
 	}
-	compressed_free(a);
+	//compressed_free(a);
 	printf("--Simple Single compressed Alloc Test Passed\n--");
 	return 0;
 }
@@ -53,7 +53,7 @@ int multiple_simple_alloc_test() {
 int single_big_alloc_test() {
 	printf("-- Big Alloc Call Test --");
 	int i;
-	int * arr = malloc(DUMMY_INT_ARRAY_SIZE * sizeof(int));
+	int * arr = compressed_alloc((DUMMY_INT_ARRAY_SIZE * sizeof(int)));
 	if (arr == NULL) {
 		printf("--Big compressed Alloc Test Failed\n--");
 		return (1);
@@ -78,7 +78,7 @@ int multiple_big_allocs_test() {
 	int j;
 	for (j = 0; j < DUMMY_ITERATIONS; ++j) {
 		int i;
-		int * arr = malloc(DUMMY_INT_ARRAY_SIZE * sizeof(int));
+		int * arr = compressed_alloc(DUMMY_INT_ARRAY_SIZE * sizeof(int));
 		if (arr == NULL) {
 			printf("--Multiple Big compressed Allocs Test Failed\n--");
 			return (1);
@@ -109,21 +109,21 @@ int main() {
 	}
 
 	/* ----- MULTIPLE COMPRESSED ALLOC CALLS TEST -------- */
-	int status = multiple_simple_alloc_test();
+	status = multiple_simple_alloc_test();
 	if (status) {
 		printf("Exiting testing\n");
 		return 0;
 	}
 
 	/* ---- SINGLE BIG ALLOC CALL TEST ----*/
-	int status = single_big_alloc_test();
+	status = single_big_alloc_test();
 	if (status) {
 		printf("Exiting testing\n");
 		return 0;
 	}
 
 	/* ---- MULTIPLE BIG ALLOC CALL TEST ----*/
-	int status = multiple_big_alloc_test();
+	status = multiple_big_allocs_test();
 	if (status) {
 		printf("Exiting testing\n");
 		return 0;
