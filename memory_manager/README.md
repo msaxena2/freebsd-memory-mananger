@@ -27,4 +27,5 @@ Call `make` to make the executable called `tester`. Use this to run the tests.
 
 ### Implementation Details
 
-We use Implicit Lists with Bi-Diretional coalescing for effective memory management. Placement policy used is first fit. For more information, see UIUC CS 241 [slides](https://courses.engr.illinois.edu/cs241/sp2012/lectures/09-malloc.pdf).
+We use Implicit Lists with Bi-Diretional coalescing for effective memory management. Placement policy used is First Fit. For more information, see UIUC CS 241 [slides](https://courses.engr.illinois.edu/cs241/sp2012/lectures/09-malloc.pdf). Future work will focus on defragmentation of data for better space utilization, and experimenting with other placement policies like Best-Fit. 
+
