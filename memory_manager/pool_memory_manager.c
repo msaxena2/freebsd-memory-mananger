@@ -201,14 +201,37 @@ struct indicator_data * merge_previous_block(struct indicator_data * curr_block)
  * Private function to merge the next block, if possible
  */
 
+void merge_next_block(struct indicator_data * curr_block) {
+	struct indicator_data * curr_end_ptr =
+			(struct indicator_data *) (((void *) curr_block)
+					+ curr_block->block_size + sizeof(struct indicator_data));
 
+	if (curr_end_ptr->occupied > 1) {
+		curr_end_ptr->block_size = curr_block->block_size;
+		curr_end_ptr->occupied = UNOCCUPIEDFB;
+		return;
+	}
+
+	struct indicator_data * next_blk_ptr =
+			(struct indicator_data *) (((void *) curr_end_ptr)
+					+ sizeof(struct indicator_data));
+
+	if (next_blk_ptr->occupied) {
+		return;
+	}
+	/* Merging can occur */
+	size_t current_capacity = curr_block->block_size;
+	size_t new_capacity = current_capacity + next_blk_ptr->block_size;
+
+}
 
 /*
  * Given a block, marked it as free for use.
  * Coalesce with other nearby blocks if they're also free.
  */
 void free(void * ptr) {
-	struct indicator_data * new_blk_ptr = merge_previous_block((struct indicator_data *) ptr);
+	struct indicator_data * new_blk_ptr = merge_previous_block(
+			(struct indicator_data *) ptr);
 
 }
 
