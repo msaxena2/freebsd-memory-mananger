@@ -244,6 +244,7 @@ void merge_next_block(struct indicator_data * curr_block) {
  * Coalesce with other nearby blocks if they're also free.
  */
 void compressed_free(void * ptr) {
+	ptr = ptr - sizeof(struct indicator_data);
 	struct indicator_data * new_blk_ptr = merge_previous_block(
 			(struct indicator_data *) ptr);
 	merge_next_block(new_blk_ptr);
