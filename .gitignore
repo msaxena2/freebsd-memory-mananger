@@ -185,3 +185,5 @@ local.properties
 
 
 memory_manager/tester
+
+memory_manager/*.core
