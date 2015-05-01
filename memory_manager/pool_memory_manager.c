@@ -16,6 +16,8 @@
 /* Flags for occupied/unoccupied */
 #define UNOCCUPIED 0
 #define OCCUPIED 1
+
+/* Higher values indicate block endings */
 #define UNOCCUPIEDFB 2
 #define OCCUPIEDFB 3
 
@@ -104,7 +106,7 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	int original_capacity = block_ptr_node->block_size;
 
 	/* Check for ending block */
-	if (block_ptr_node->occupied > 1) {
+	if (block_ptr_node->occupied > OCCUPIED) {
 		split_setter(adjusted_size, block_ptr_node, OCCUPIEDFB);
 	} else {
 		split_setter(adjusted_size, block_ptr_node, OCCUPIED);
@@ -123,7 +125,7 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	struct indicator_data * end_ptr = (struct indicator_data *) void_block_ptr;
 
 	/* Check for ending block */
-	if (end_ptr->occupied > 1) {
+	if (end_ptr->occupied > OCCUPIED) {
 		split_setter(new_capacity, (struct indicator_data *) void_block_ptr,
 		UNOCCUPIEDFB);
 	} else {
