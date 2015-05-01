@@ -179,8 +179,8 @@ void * compressed_alloc(size_t size) {
 	return first_fit_add(new_block->block_ptr, size);
 }
 
-/* Private helper function to help with free
- *
+/*
+ * Private helper function to help with free
  */
 struct indicator_data * merge_previous_block(struct indicator_data * curr_block) {
 	/* check if possible to merge the block with the previous one */
