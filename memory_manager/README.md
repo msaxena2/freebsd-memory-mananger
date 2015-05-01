@@ -24,3 +24,7 @@ The tests exists  under the test folder. The file inside has clear instructions 
 The makefile has all warnings enabled, and also makes the compiler treat warnings as errors. This has been done on purpose. Code must compile without warnings. 
 
 Call `make` to make the executable called `tester`. Use this to run the tests.
+
+### Implementation Details
+
+We use Implicit Lists with Bi-Diretional coalescing for effective memory management. Placement policy used is first fit. For more information, see UIUC CS 241 [slides](https://courses.engr.illinois.edu/cs241/sp2012/lectures/09-malloc.pdf).
