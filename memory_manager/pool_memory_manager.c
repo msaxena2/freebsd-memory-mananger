@@ -220,9 +220,11 @@ void merge_next_block(struct indicator_data * curr_block) {
 		return;
 	}
 	/* Merging can occur */
-	size_t current_capacity = curr_block->block_size;
-	size_t new_capacity = current_capacity + next_blk_ptr->block_size;
-
+	size_t new_capacity = curr_block->block_size + next_blk_ptr->block_size;
+	curr_block->block_size = new_capacity;
+	((struct indicator_data *) (((void *) curr_block)
+			+ (3 * sizeof(struct indicator_data)) + new_capacity))->block_size =
+			new_capacity;
 }
 
 /*
@@ -232,6 +234,6 @@ void merge_next_block(struct indicator_data * curr_block) {
 void free(void * ptr) {
 	struct indicator_data * new_blk_ptr = merge_previous_block(
 			(struct indicator_data *) ptr);
-
+	merge_next_block(new_blk_ptr);
 }
 
