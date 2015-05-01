@@ -59,11 +59,7 @@ void split_setter(size_t adjusted_size, struct indicator_data* block_ptr_node,
 		int occupied) {
 	block_ptr_node->block_size = adjusted_size;
 	/* Set according to block location */
-	if (block_ptr_node->occupied > 1) {
-		block_ptr_node->occupied = occupied + 2;
-	} else {
-		block_ptr_node->occupied = occupied;
-	}
+	block_ptr_node->occupied = occupied;
 }
 
 /*
@@ -106,7 +102,13 @@ void * first_fit_add(void * block_ptr, size_t size) {
 
 	/* splitting can occur */
 	int original_capacity = block_ptr_node->block_size;
-	split_setter(adjusted_size, block_ptr_node, OCCUPIED);
+
+	/* Check for ending block */
+	if (block_ptr_node->occupied > 1) {
+		split_setter(adjusted_size, block_ptr_node, OCCUPIEDFB);
+	} else {
+		split_setter(adjusted_size, block_ptr_node, OCCUPIED);
+	}
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ adjusted_size;
 	split_setter(adjusted_size, (struct indicator_data *) void_block_ptr,
@@ -118,8 +120,16 @@ void * first_fit_add(void * block_ptr, size_t size) {
 	UNOCCUPIED);
 	void_block_ptr = void_block_ptr + sizeof(struct indicator_data)
 			+ new_capacity;
-	split_setter(new_capacity, (struct indicator_data *) void_block_ptr,
-	UNOCCUPIED);
+	struct indicator_data * end_ptr = (struct indicator_data *) void_block_ptr;
+
+	/* Check for ending block */
+	if (end_ptr->occupied > 1) {
+		split_setter(new_capacity, (struct indicator_data *) void_block_ptr,
+		UNOCCUPIEDFB);
+	} else {
+		split_setter(new_capacity, (struct indicator_data *) void_block_ptr,
+		UNOCCUPIED);
+	}
 	return ((void *) (block_ptr_node + 1));
 }
 /*

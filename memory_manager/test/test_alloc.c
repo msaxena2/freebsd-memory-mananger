@@ -107,27 +107,27 @@ int main() {
 		printf("Exiting testing\n");
 		return 0;
 	}
-//
-//	/* ----- MULTIPLE COMPRESSED ALLOC CALLS TEST -------- */
-//	status = multiple_simple_alloc_test();
-//	if (status) {
-//		printf("Exiting testing\n");
-//		return 0;
-//	}
-//
-//	/* ---- SINGLE BIG ALLOC CALL TEST ----*/
-//	status = single_big_alloc_test();
-//	if (status) {
-//		printf("Exiting testing\n");
-//		return 0;
-//	}
-//
-//	/* ---- MULTIPLE BIG ALLOC CALL TEST ----*/
-//	status = multiple_big_allocs_test();
-//	if (status) {
-//		printf("Exiting testing\n");
-//		return 0;
-//	}
+
+	/* ----- MULTIPLE COMPRESSED ALLOC CALLS TEST -------- */
+	status = multiple_simple_alloc_test();
+	if (status) {
+		printf("Exiting testing\n");
+		return 0;
+	}
+
+	/* ---- SINGLE BIG ALLOC CALL TEST ----*/
+	status = single_big_alloc_test();
+	if (status) {
+		printf("Exiting testing\n");
+		return 0;
+	}
+
+	/* ---- MULTIPLE BIG ALLOC CALL TEST ----*/
+	status = multiple_big_allocs_test();
+	if (status) {
+		printf("Exiting testing\n");
+		return 0;
+	}
 
 	/* --- ADD MORE TESTS HERE --- */
 	//@Todo: Incremental memory pressure increase, and big memory tests to be added
